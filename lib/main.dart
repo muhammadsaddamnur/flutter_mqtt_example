@@ -1,11 +1,14 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
+import 'package:mqtt_explore/model/pesan.pb.dart';
 import 'package:mqtt_explore/mqtt_service/mqtt_manager.dart';
 import 'package:mqtt_explore/mqtt_service/mqtt_state.dart';
 import 'package:provider/provider.dart';
+import 'package:typed_data/typed_data.dart';
 
 void main() {
   runApp(const MyApp());
@@ -62,6 +65,24 @@ class _MyHomePageState extends State<MyHomePage> {
   void disconnect() {
     manager!.disconnect();
     setState(() {});
+  }
+
+  Uint8Buffer? createProto() {
+    Chats chats = Chats();
+    Pesan pesan = Pesan();
+
+    if (chat.text.isNotEmpty) {
+      pesan.pesan = chat.text;
+
+      chats.pesan.add(pesan);
+    }
+
+    Uint8List data = chats.writeToBuffer();
+    Uint8Buffer dataBuffer = Uint8Buffer();
+    dataBuffer.addAll(data);
+
+    print(dataBuffer);
+    return dataBuffer;
   }
 
   @override
@@ -155,9 +176,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   ElevatedButton(
                     onPressed: () {
                       if (manager != null) {
-                        manager!.publish(chat.text);
-                        chat.clear();
-                        FocusScope.of(context).unfocus();
+                        Uint8Buffer? chatMessageProto = createProto();
+                        if (chatMessageProto != null) {
+                          manager!.publish(chatMessageProto);
+                          chat.clear();
+                          FocusScope.of(context).unfocus();
+                        }
                       }
                     },
                     child: const Text('Publish'),

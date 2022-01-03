@@ -1,6 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:mqtt_explore/mqtt_service/mqtt_state.dart';
+import 'package:typed_data/typed_data.dart';
 
 class MqttManager {
   final String identifier;
@@ -59,9 +62,9 @@ class MqttManager {
         .setAppConnectionState(MqttAppConnectionState.disconnected);
   }
 
-  void publish(String message) {
+  void publish(Uint8Buffer message) {
     final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
-    builder.addString(message);
+    builder.addBuffer(message);
     try {
       client!.publishMessage(topic, MqttQos.atMostOnce, builder.payload!);
     } catch (e) {

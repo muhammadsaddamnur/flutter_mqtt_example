@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+message Pesan {
+    string pesan = 1;
+}
+
+message Chats {
+    repeated Pesan Pesan = 1;
+}
